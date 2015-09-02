@@ -204,6 +204,8 @@ describe handler, lita_handler: true do
   end
 
   context "when the handler raises an exception" do
+    before { registry.initialize_config }
+
     it "calls the error handler with the exception as argument" do
       expect(registry.config.robot.error_handler).to receive(:call).with(instance_of(TypeError))
 

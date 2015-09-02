@@ -89,6 +89,8 @@ describe handler, lita_handler: true do
   end
 
   context "when the handler raises an exception" do
+    before { registry.initialize_config }
+
     it "calls the error handler with the exception as argument" do
       expect(registry.config.robot.error_handler).to receive(:call).with(instance_of(TypeError))
 
@@ -111,7 +113,10 @@ describe handler, lita_handler: true do
     end
   end
 
-  prepend_before { registry.config.http.middleware.push(middleware) }
+  before do
+    registry.initialize_config
+    registry.config.http.middleware.push(middleware)
+  end
 
   it "uses any custom middlewares registered" do
     response = http.get("/middleware")
@@ -136,7 +141,8 @@ describe handler, lita_handler: true do
     end
   end
 
-  prepend_before do
+  before do
+    registry.initialize_config
     registry.config.http.middleware.use(middleware, true) { "header value" }
   end
 

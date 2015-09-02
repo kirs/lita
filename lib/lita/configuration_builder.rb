@@ -53,12 +53,11 @@ module Lita
         begin
           load(config_path)
         rescue Exception => e
-          Lita.logger.fatal I18n.t(
+          abort I18n.t(
             "lita.config.exception",
             message: e.message,
             backtrace: e.backtrace.join("\n")
           )
-          abort
         end if File.exist?(config_path)
       end
     end
@@ -189,10 +188,7 @@ module Lita
     # Check's the value's type from inside the finalized object.
     def check_types(value)
       if types && types.none? { |type| type === value }
-        Lita.logger.fatal(
-          I18n.t("lita.config.type_error", attribute: name, types: types.join(", "))
-        )
-        abort
+        abort I18n.t("lita.config.type_error", attribute: name, types: types.join(", "))
       end
     end
 
@@ -210,10 +206,7 @@ module Lita
       error = validator.call(value)
 
       if error
-        Lita.logger.fatal(
-          I18n.t("lita.config.validation_error", attribute: name, message: error)
-        )
-        abort
+        abort I18n.t("lita.config.validation_error", attribute: name, message: error)
       end
     end
   end

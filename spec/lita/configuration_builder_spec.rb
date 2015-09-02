@@ -5,12 +5,13 @@ describe Lita::ConfigurationBuilder do
 
   describe ".load_user_config" do
     it "loads and evals lita_config.rb" do
+      evaluated = false
       allow(File).to receive(:exist?).and_return(true)
       allow(described_class).to receive(:load) do
-        Lita.configure { |c| c.robot.name = "Not Lita" }
+        evaluated = true
       end
       described_class.load_user_config
-      expect(Lita.config.robot.name).to eq("Not Lita")
+      expect(evaluated).to be(true)
     end
 
     it "doesn't attempt to load lita_config.rb if it doesn't exist" do
@@ -22,8 +23,10 @@ describe Lita::ConfigurationBuilder do
     it "raises an exception if lita_config.rb raises an exception" do
       allow(File).to receive(:exist?).and_return(true)
       allow(described_class).to receive(:load) { Lita.non_existent_method }
-      expect(Lita.logger).to receive(:fatal).with(/could not be processed/)
-      expect { described_class.load_user_config }.to raise_error(SystemExit)
+      expect { described_class.load_user_config }.to raise_error(
+        SystemExit,
+        /could not be processed/,
+      )
     end
   end
 
@@ -53,10 +56,10 @@ describe Lita::ConfigurationBuilder do
     end
 
     it "raises if set to a value of the wrong type" do
-      expect(Lita.logger).to receive(:fatal).with(
-        /Configuration type error: "simple" must be one of: Symbol/
+      expect { config.simple = "foo" }.to raise_error(
+        SystemExit,
+        /Configuration type error: "simple" must be one of: Symbol/,
       )
-      expect { config.simple = "foo" }.to raise_error(SystemExit)
     end
   end
 
@@ -78,10 +81,10 @@ describe Lita::ConfigurationBuilder do
     end
 
     it "raises if set to a value of the wrong type" do
-      expect(Lita.logger).to receive(:fatal).with(
-        /Configuration type error: "simple" must be one of: Symbol, String/
+      expect { config.simple = 1 }.to raise_error(
+        SystemExit,
+        /Configuration type error: "simple" must be one of: Symbol, String/,
       )
-      expect { config.simple = 1 }.to raise_error(SystemExit)
     end
   end
 
@@ -122,10 +125,10 @@ describe Lita::ConfigurationBuilder do
     end
 
     it "raises if the validator raises due to an invalid value" do
-      expect(Lita.logger).to receive(:fatal).with(
-        /Validation error on attribute "simple": must be true/
+      expect { config.simple = false }.to raise_error(
+        SystemExit,
+        /Validation error on attribute "simple": must be true/,
       )
-      expect { config.simple = false }.to raise_error(SystemExit)
     end
   end
 
@@ -193,10 +196,10 @@ describe Lita::ConfigurationBuilder do
     end
 
     it "has working validation" do
-      expect(Lita.logger).to receive(:fatal).with(
-        /Validation error on attribute "foo": must include bar/
+      expect { config.nested.foo = "baz" }.to raise_error(
+        SystemExit,
+        /Validation error on attribute "foo": must include bar/,
       )
-      expect { config.nested.foo = "baz" }.to raise_error(SystemExit)
     end
 
     it "can get the second nested attribute" do
@@ -204,10 +207,10 @@ describe Lita::ConfigurationBuilder do
     end
 
     it "can set the second nested attribute and options take effect" do
-      expect(Lita.logger).to receive(:fatal).with(
-        /Configuration type error: "bar" must be one of: Symbol/
+      expect { config.nested.bar = "not a symbol" }.to raise_error(
+        SystemExit,
+        /Configuration type error: "bar" must be one of: Symbol/,
       )
-      expect { config.nested.bar = "not a symbol" }.to raise_error(SystemExit)
     end
   end
 

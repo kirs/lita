@@ -26,12 +26,12 @@ module Lita
       # @return [void]
       def included(base)
         base.class_eval do
+          let(:log_output) { StringIO.new }
           let(:registry) { Registry.new }
 
           before do
+            registry.logger = Logger.get_logger(:debug, nil, io: log_output)
             stub_const("Lita::REDIS_NAMESPACE", "lita.test")
-            keys = Lita.redis.keys("*")
-            Lita.redis.del(keys) unless keys.empty?
           end
         end
       end

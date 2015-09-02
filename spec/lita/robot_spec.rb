@@ -107,6 +107,7 @@ describe Lita::Robot, lita: true do
     end
 
     it "logs and quits if the specified adapter can't be found" do
+      registry.initialize_config
       registry.config.robot.adapter = :does_not_exist
       expect(subject.logger).to receive(:fatal).with(/Unknown adapter/)
       expect { subject.run }.to raise_error(SystemExit)

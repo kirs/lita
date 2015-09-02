@@ -20,6 +20,8 @@ end
 
 describe handler_class, lita_handler: true, additional_lita_handlers: additional_handler_class do
   context 'when the "additional_lita_handlers" metadata is provided' do
+    before { registry.initialize_config }
+
     it "loads additional handlers into the registry" do
       expect(registry.handlers).to include(additional_handler_class)
     end

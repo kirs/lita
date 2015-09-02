@@ -8,6 +8,7 @@ describe Lita::Authorization, lita: true do
   subject { described_class.new(robot) }
 
   before do
+    registry.initialize_config
     registry.config.robot.admins = ["1"]
   end
 

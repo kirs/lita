@@ -57,7 +57,9 @@ module Lita
     def_delegators :adapter, :chat_service, :mention_format, :roster
 
     # @param registry [Registry] The registry for the robot's configuration and plugins.
-    def initialize(registry = Lita)
+    def initialize(registry)
+      registry.initialize_config unless registry.config
+      registry.finalize unless registry.redis
       @registry = registry
       @name = config.robot.name
       @mention_name = config.robot.mention_name || @name

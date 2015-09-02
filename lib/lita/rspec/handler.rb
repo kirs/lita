@@ -39,7 +39,9 @@ module Lita
           base.class_eval do
             before do
               registry.register_adapter(:test, Lita::Adapters::Test)
-              registry.config.robot.adapter = :test
+              registry.configure do |config|
+                config.robot.adapter = :test
+              end
             end
           end
         end

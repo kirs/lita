@@ -1,15 +1,7 @@
 require "spec_helper"
 
 describe Lita::Adapters::Shell, lita: true do
-  let(:robot) do
-    instance_double(
-      "Lita::Robot",
-      name: "Lita",
-      mention_name: "LitaBot",
-      alias: "/",
-      config: registry.config
-    )
-  end
+  let(:robot) { Lita::Robot.new(registry) }
 
   subject { described_class.new(robot) }
 

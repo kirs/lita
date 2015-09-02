@@ -1,3 +1,5 @@
+require "forwardable"
+
 require "i18n"
 require "redis-namespace"
 
@@ -16,7 +18,26 @@ module Lita
   REDIS_NAMESPACE = "lita"
 
   class << self
-    include Registry::Mixins
+    extend Forwardable
+
+    def_delegators :@registry,
+      :adapters,
+      :clear_config,
+      :config,
+      :configure,
+      :handlers,
+      :hooks,
+      :initialize_config,
+      :logger,
+      :redis,
+      :register_adapter,
+      :register_handler,
+      :register_hook,
+      :reset,
+      :reset_adapters,
+      :reset_config,
+      :reset_handlers,
+      :reset_hooks
 
     # A mode that makes minor changes to the Lita runtime to improve testability.
     # @return [Boolean] Whether or not test mode is active.
@@ -24,22 +45,18 @@ module Lita
     attr_accessor :test_mode
     alias_method :test_mode?, :test_mode
 
-    # A global logger. Initialized before configuration so it doesn't respect log-related Lita
-    # configuration. The log level defaults to :info and can be set by invoking the process with the
-    # environment variable LITA_GLOBAL_LOG_LEVEL set to one of the standard log level names.
-    attr_accessor :logger
-
     # Loads user configuration and starts the robot.
     # @param config_path [String] The path to the user configuration file.
     # @return [void]
     def run(config_path = nil)
       hooks[:before_run].each { |hook| hook.call(config_path: config_path) }
+      initialize_config
       ConfigurationBuilder.load_user_config(config_path)
       ConfigurationBuilder.freeze_config(config)
       ConfigurationValidator.new(self).call
       hooks[:config_finalized].each { |hook| hook.call(config_path: config_path) }
       self.locale = config.robot.locale
-      Robot.new.run
+      Robot.new(@registry).run
     end
 
     # A special mode to ensure that tests written for Lita 3 plugins continue to work. Has no effect
@@ -54,7 +71,7 @@ module Lita
     alias_method :version_3_compatibility_mode=, :version_3_compatibility_mode
   end
 
-  self.logger = Logger.get_logger(ENV["LITA_GLOBAL_LOG_LEVEL"], nil)
+  @registry = Registry.new
 end
 
 require_relative "lita/adapters/shell"
